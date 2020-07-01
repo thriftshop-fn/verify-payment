@@ -105,6 +105,17 @@ exports.handler = async (event, context, callback) => {
       return error;
     }
 
+    let verified = rows[rowIndex].paid == "yes" ? true : false;
+
+    if(verified){
+        let error = {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Payment is Already Verified!" }),
+        };
+        return error;
+    }
+
+
     let endpoint = `${URL}/${reference_no}?livemode=${PAYMONGO_LIVEMODE}`;
 
     const token = await getApiToken();
