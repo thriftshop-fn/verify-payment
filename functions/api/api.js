@@ -33,6 +33,26 @@ exports.handler = async (event, context, callback) => {
       headers: { Allow: "POST" },
     };
   }
+
+  const { reference_no = null } = JSON.parse(event.body);
+
+  let validationError = [];
+
+  if (!reference_no) {
+    let error = {
+      field: "reference_no",
+      message: "No Reference No. Submitted, *reference_no* is required",
+    };
+    validationError.push(error);
+  }
+
+  if (validationError.length > 0) {
+    return {
+      statusCode: 422,
+      body: JSON.stringify({ errors: validationError }),
+    };
+  }
+
   let credentials = {
     data: {
       attributes: {
@@ -41,6 +61,7 @@ exports.handler = async (event, context, callback) => {
       },
     },
   };
+
   const getApiToken = async () => {
     try {
       const res = await axios({
@@ -50,11 +71,14 @@ exports.handler = async (event, context, callback) => {
       });
       const token = await res.data.data.id;
       return token;
-    } catch (error) {
-      console.log(error);
-      return error;
+    } catch (e) {
+      return {
+        statusCode: 500,
+        body: e.toString(),
+      };
     }
   };
+
   try {
     const doc = new GoogleSpreadsheet(GOOGLE_SPREADSHEET_ID_FROM_URL);
 
@@ -65,30 +89,11 @@ exports.handler = async (event, context, callback) => {
 
     await doc.loadInfo();
 
-    const sheet = doc.sheetsByIndex[0];
+    const purchase_sheet = doc.sheetsById[1];
 
-    const { reference_no = null } = JSON.parse(event.body);
+    const rows = await purchase_sheet.getRows();
 
-    let validationError = [];
-
-    if (!reference_no) {
-      let error = {
-        field: "reference_no",
-        message: "No Reference No. Submitted, *reference_no* is required",
-      };
-      validationError.push(error);
-    }
-
-    if (validationError.length > 0) {
-      return {
-        statusCode: 422,
-        body: JSON.stringify({ errors: validationError }),
-      };
-    }
-
-    const rows = await sheet.getRows();
-
-    sheet.loadHeaderRow();
+    purchase_sheet.loadHeaderRow();
 
     const rowIndex = rows.findIndex((x) => x.reference_no == reference_no);
 
@@ -159,7 +164,6 @@ exports.handler = async (event, context, callback) => {
     let m1 = newDate1.getMonth();
     let y1 = newDate1.getFullYear();
 
-    //! Useful for Refund
     let date_paid = `${y}-${m}-${d}`;
     let payout_date = `${y1}-${m1}-${d1}`;
 
@@ -179,13 +183,13 @@ exports.handler = async (event, context, callback) => {
     rows[rowIndex].billing_address = fullAddress;
     rows[rowIndex].remarks = remarks;
 
-    //! Setting Up Referral Commission
     const username = rows[rowIndex].referral_code
       ? rows[rowIndex].referral_code
       : null;
 
     if (username) {
-      const referrals = doc.sheetsByIndex[1];
+      const referrals = doc.sheetsById[2];
+
       const referrals_rows = await referrals.getRows();
 
       if (referrals.rowCount > 0) {
@@ -213,7 +217,7 @@ exports.handler = async (event, context, callback) => {
 
     await rows[rowIndex].save();
 
-    let header = sheet.headerValues;
+    let header = purchase_sheet.headerValues;
 
     const rowData = {};
 
