@@ -1,7 +1,7 @@
 {
   "name": "verify-payment-fn",
   "version": "1.0.0",
-  "description": "## Usage",
+  "description": "Verify Payment and Update SpreadSheet",
   "author": "GoldCoders",
   "license": "ISC",
   "dependencies": {
