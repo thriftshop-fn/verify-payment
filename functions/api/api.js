@@ -107,14 +107,13 @@ exports.handler = async (event, context, callback) => {
 
     let verified = rows[rowIndex].paid == "yes" ? true : false;
 
-    if(verified){
-        let error = {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Payment is Already Verified!" }),
-        };
-        return error;
+    if (verified) {
+      let error = {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Payment is Already Verified!" }),
+      };
+      return error;
     }
-
 
     let endpoint = `${URL}/${reference_no}?livemode=${PAYMONGO_LIVEMODE}`;
 
@@ -205,34 +204,32 @@ exports.handler = async (event, context, callback) => {
         const ref_index = referrals_rows.findIndex(
           (x) => x.referral_code == username
         );
-        if (ref_index != -1) {
-          switch (referrals_rows[ref_index].type) {
-            case "fixed":
-              rows[rowIndex].referral_fee = referrals_rows[ref_index].amount;
-              break;
-            default:
-              rows[rowIndex].referral_fee =
-                parseFloat(parseInt(net_amount) / 100) *
-                (parseFloat(referrals_rows[ref_index].amount) / 100);
-              break;
+        if (referrals_rows[ref_index].active === "TRUE") {
+          if (ref_index != -1) {
+            switch (referrals_rows[ref_index].type) {
+              case "fixed":
+                rows[rowIndex].referral_fee = referrals_rows[ref_index].amount;
+                break;
+              default:
+                rows[rowIndex].referral_fee =
+                  parseFloat(parseInt(net_amount) / 100) *
+                  (parseFloat(referrals_rows[ref_index].amount) / 100);
+                break;
+            }
           }
+        } else {
+          rows[rowIndex].referral_code = "";
         }
       }
     }
 
     await rows[rowIndex].save();
 
-    let header = purchase_sheet.headerValues;
-
-    const rowData = {};
-
-    header.forEach((element) => {
-      rowData[element] = rows[rowIndex][element];
-    });
-
     return {
       statusCode: 200,
-      body: JSON.stringify(rowData),
+      body: JSON.stringify({
+        message: "Payment Has Been Verified , Thank You!",
+      }),
     };
   } catch (e) {
     console.log(e.toString());

@@ -94,6 +94,9 @@ https://docs.google.com/spreadsheets/d/COPY-THIS-URL-SEGMENT/edit#gid=0
 }
 ```
 
+- Note: Referral Commission is **ONLY GRANTED** to Active Referral, during payment verification
+
+- If Payment is Unpaid We Redirect User to the PM Link.
 
 ## Deploy
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/thriftshop-fn/verify-payment)
