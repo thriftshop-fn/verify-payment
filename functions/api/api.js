@@ -154,7 +154,6 @@ exports.handler = async (event, context, callback) => {
       paid_at,
       available_at,
       billing,
-      remarks,
     } = payment_details;
 
     const { name, email, phone, address } = billing;
@@ -192,7 +191,6 @@ exports.handler = async (event, context, callback) => {
     rows[rowIndex].payer_email = email;
     rows[rowIndex].payer_phone = phone;
     rows[rowIndex].billing_address = fullAddress;
-    rows[rowIndex].remarks = remarks;
 
     const username = rows[rowIndex].referral_code
       ? rows[rowIndex].referral_code
