@@ -5,8 +5,8 @@
   "author": "GoldCoders",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^1.6.5",
     "dotenv": "^8.2.0",
-    "google-spreadsheet": "^3.0.11"
+    "google-spreadsheet": "^3.3.0"
   }
 }
